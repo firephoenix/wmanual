@@ -5,3 +5,6 @@ SOURCES += \
 
 HEADERS += \
     mainwindow.h
+
+RESOURCES += \
+    manual.qrc
