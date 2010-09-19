@@ -6,6 +6,9 @@ MainWindow::MainWindow(QWidget *parent)
     this->setWindowIcon(QIcon(":/images/books.png"));
     this->setWindowTitle(tr("机械设计辅助手册"));
 
+    menuBar = new MenuBar;
+    this->setMenuBar(menuBar);
+
     this->resize(QSize(800,600).expandedTo(this->minimumSizeHint()));
 }
 
