@@ -3,23 +3,23 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    this->resize(QSize(800, 600).expandedTo(this->minimumSizeHint()));
-    setWindowIcon(QIcon(":/images/books.png"));
-    setWindowTitle(tr("机械设计辅助手册"));
+    this->resize(QSize(800, 600).expandedTo(this->minimumSizeHint()));//设置初始化窗口大小
+    setWindowIcon(QIcon(":/images/books.png"));//设置窗口图标
+    setWindowTitle(tr("机械设计辅助手册"));//设置标题兰标题
     db = QSqlDatabase::addDatabase("QSQLITE");  //使用sqlite数据库驱动
     db.setDatabaseName("../manual/manual");  //我们之前建立的数据库
     connectOK = db.open();  //尝试连接数据库
-    if(connectOK)
+    if(connectOK)//判断连接数据库是否成功
     {
         createActions();//创建动作
         createMenus();//创建菜单栏
         createToolBars();//创建工具栏
-        mainSplitter = new QSplitter(Qt::Horizontal);//主窗口
+        mainSplitter = new QSplitter(Qt::Horizontal);//主窗口,为水平分割的两个面板
 
-        mainTree = new QTreeWidget;
-        mainTree->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-        createMainTree();
-        mainSplitter->addWidget(mainTree);
+        mainTree = new QTreeWidget;//目录树
+        mainTree->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);// 定义水平滚动条，当需要时就显示
+        createMainTree();//创建目录树
+        mainSplitter->addWidget(mainTree);//主窗口加载目录树
         //defaultScene = new QGraphicsScene;
         //defaultScene->addText("hello world!");//默认右窗口
         //defaultView = new QGraphicsView(defaultScene);
