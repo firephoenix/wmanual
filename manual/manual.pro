@@ -1,14 +1,16 @@
+#-------------------------------------------------
+#
+# Project created by QtCreator 2010-09-02T19:21:58
+#
+#-------------------------------------------------
+QT           += sql
 
-SOURCES += \
-    main.cpp \
-    mainwindow.cpp \
-    menubar.cpp \
-    actions.cpp
+TARGET = manual
+TEMPLATE = app
 
-HEADERS += \
-    mainwindow.h \
-    menubar.h \
-    actions.h
+SOURCES += main.cpp\
+        mainwindow.cpp
 
-RESOURCES += \
-    manual.qrc
+HEADERS  += mainwindow.h
+
+RESOURCES = manual.qrc
