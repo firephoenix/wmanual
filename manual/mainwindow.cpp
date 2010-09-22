@@ -4,10 +4,10 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     this->resize(QSize(800, 600).expandedTo(this->minimumSizeHint()));
-    setWindowIcon(QIcon(":/images/books.png"));
-    setWindowTitle(tr("机械设计辅助手册"));
+    setWindowIcon(QIcon(":/images/books.png"));//设置窗口标题栏图标
+    setWindowTitle(tr("机械设计辅助手册"));//设置窗口标题栏标题文字
     db = QSqlDatabase::addDatabase("QSQLITE");  //使用sqlite数据库驱动
-    db.setDatabaseName("../manual/manual");  //我们之前建立的数据库
+    db.setDatabaseName("../manual/manualdata.db3");  //我们之前建立的数据库
     connectOK = db.open();  //尝试连接数据库
     if(connectOK)
     {
@@ -16,9 +16,9 @@ MainWindow::MainWindow(QWidget *parent)
         createToolBars();//创建工具栏
         mainSplitter = new QSplitter(Qt::Horizontal);//主窗口
 
-        mainTree = new QTreeWidget;
-        mainTree->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-        createMainTree();
+        mainTree = new QTreeWidget;//定义目录树
+        mainTree->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);//设置水平滚动条
+        createMainTree();//创建目录树
         mainSplitter->addWidget(mainTree);
         //defaultScene = new QGraphicsScene;
         //defaultScene->addText("hello world!");//默认右窗口
@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent)
     }
     else
     {//打开数据库失败，显示数据库返回的失败描述
-        QMessageBox::critical(0,tr("无法撕开数据库"),db.lastError().databaseText());
+        QMessageBox::critical(0,tr("无法打开数据库"),db.lastError().databaseText());
     }
     //db.close();
 }

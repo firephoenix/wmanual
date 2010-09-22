@@ -37,9 +37,9 @@ protected:
     void closeEvent(QCloseEvent *event);//关闭事件
 
 private slots:
-    void about();
-    void searchClick();
-    void mainTreeClick(QTreeWidgetItem* treeItem,int col);
+    void about();//定义关于对话框
+    void searchClick();//定义搜索
+    void mainTreeClick(QTreeWidgetItem* treeItem,int col);//定义目录点击事件
 
 private:
     void createActions();//声明事件
@@ -68,7 +68,9 @@ private:
     QSplitter *rightSplitter;//声明右窗口
     QSplitter *mainSplitter;//声明主窗口
     QLabel *picLabel;//默认右面板
-    QTableWidget *dataTable;
+    QTableWidget *dataTable;//声明表格
+    QGraphicsScene *adScene;//声明广告场景
+    QGraphicsView *adView;//声明广告视图
     QGraphicsScene noteScene;
     QGraphicsView noteView;
 
