@@ -34,12 +34,15 @@ public:
     ~MainWindow();
 
 protected:
-    void closeEvent(QCloseEvent *event);//关闭事件
+    void closeEvent(QCloseEvent *event);//标题栏关闭事件
 
 private slots:
     void about();//定义关于对话框
     void searchClick();//定义搜索
     void mainTreeClick(QTreeWidgetItem* treeItem,int col);//定义目录点击事件
+    void about();//关于对话框
+    void searchClick();//
+    void mainTreeClick(QTreeWidgetItem* treeItem,int col);//定义鼠标单击树事件
 
 private:
     void createActions();//声明事件
@@ -71,6 +74,9 @@ private:
     QTableWidget *dataTable;//声明表格
     QGraphicsScene *adScene;//声明广告场景
     QGraphicsView *adView;//声明广告视图
+    QGraphicsScene *adScene;//广告场景
+    QGraphicsView *adView;//广告片段
+    QTableWidget *dataTable;
     QGraphicsScene noteScene;
     QGraphicsView noteView;
 
