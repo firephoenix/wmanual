@@ -29,7 +29,7 @@ bool MainWindow::createConnect()
     bool connectOK = db.open();  //尝试连接数据库
     if(!connectOK)//判断连接是否成功
     {
-        QMessageBox::critical(0,QObject::tr("无法打开数据库"),db.lastError().databaseText());//连接失败后显示提示框
+        QMessageBox::critical(0,tr("无法打开数据库"),db.lastError().databaseText());//连接失败后显示提示框
         return false;
     }
     return true;
@@ -123,6 +123,7 @@ void MainWindow::createMenuTree()
             while(fstMenuQuery.next())//加载一级目录
             {
                 QStandardItem *fstItem = new QStandardItem(fstMenuQuery.value(0).toString());
+                fstItem->setData(1,Qt::UserRole);
                 treeModel->setItem(fstInt,fstItem);
                 fstInt++;
 
@@ -144,6 +145,7 @@ void MainWindow::createMenuTree()
                         while(secMenuQuery.next())//加载二级目录
                         {
                             QStandardItem *secItem = new QStandardItem(secMenuQuery.value(0).toString());
+                            secItem->setData(2,Qt::UserRole);
                             fstItem->appendRow(secItem);
 
                             if(thdMenuQuery.exec("SELECT menuitem, id FROM thirdmenus WHERE parentid = "+ secMenuQuery.value(1).toString()))
@@ -164,6 +166,7 @@ void MainWindow::createMenuTree()
                                     while(thdMenuQuery.next())//加载三级目录
                                     {
                                         QStandardItem *thdItem = new QStandardItem(thdMenuQuery.value(0).toString());
+                                        thdItem->setData(3,Qt::UserRole);
                                         secItem->appendRow(thdItem);
                                     }
                                 }
@@ -183,12 +186,7 @@ void MainWindow::createMenuTree()
 
 void MainWindow::menuTreeClick(QModelIndex)
 {
-    int selectId = menuTree->selectionModel()->currentIndex().row();
-    //int rowNo = menuTree->selectionModel()->currentIndex();
-    // index = menuTree->selectionModel()->currentIndex();
+    QVariant clickedItem = menuTree->selectionModel()->currentIndex().data(Qt::UserRole);
+    QModelIndex index = menuTree->selectionModel()->currentIndex().child(0,0);
 
-    //int value = menuTree->sortByColumn(0);
-    //QVariant val = menuTree->currentIndex().data(Qt::UserRole);
-    QMessageBox::critical(0,QObject::tr("无法打开数据库"),QString().setNum(selectId));
-    //QMessageBox::critical(0,QObject::tr("无法打开数据库"),val.toString());
 }
