@@ -18,6 +18,9 @@
 #include <QSqlDriver>
 #include <QtGui/QCloseEvent>
 #include <QtGui/QSplitter>
+#include <QtGui/QTableView>
+#include "adgraphicsview.h"
+
 
 class MainWindow : public QMainWindow
 {
@@ -39,6 +42,8 @@ private:
     void createMenus();//创建菜单栏
     void createToolBars();//创建工具栏
     void createMenuTree();//创建目录树
+    void createAd();//广告面板
+    void readAd(int adId);//读取广告
 
 private:
     QAction *exitAction;//动作退出
@@ -57,9 +62,11 @@ private:
     QSqlDatabase db;//声明数据库
     QTreeView *menuTree;//声明目录树
     QStandardItemModel *treeModel;//声明TREEMODE
+    QTableView *contentTable;//内容表单
 
     QSplitter *mainSplitter;//声明主面板
 
+    AdGraphicsView *adView;//广告
 };
 
 #endif // MAINWINDOW_H

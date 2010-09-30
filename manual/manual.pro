@@ -1,10 +1,17 @@
 QT += sql
-HEADERS += \
-    mainwindow.h
 
 SOURCES += \
+    main.cpp \
     mainwindow.cpp \
-    main.cpp
+    ProxyModelWithHeaderModels.cpp \
+    HierarchicalHeaderView.cpp \
+    adgraphicsview.cpp
+
+HEADERS += \
+    mainwindow.h \
+    ProxyModelWithHeaderModels.h \
+    HierarchicalHeaderView.h \
+    adgraphicsview.h
 
 RESOURCES += \
     manual.qrc

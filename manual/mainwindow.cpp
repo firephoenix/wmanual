@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
         this->createMenus();//创建菜单栏
         this->createToolBars();//创建工具栏
         this->createMenuTree();//创建目录树
-
+        this->readAd(1);//创建广告面板
         this->setCentralWidget(mainSplitter);//加载主面板
     }
 }
@@ -101,35 +101,35 @@ void MainWindow::createMenuTree()
     QSqlQuery fstMenuQuery;//对firstmenus搜索
     QSqlQuery secMenuQuery;//对secondmenus搜索
     QSqlQuery thdMenuQuery;//对thirdmenus搜索
-    if(fstMenuQuery.exec("SELECT menuitem, id FROM firstmenus;"))//判断搜索数据库是否成功
+    if(fstMenuQuery.exec("SELECT menuitem, id FROM firstmenus;"))//判断搜索数据库中一级目录
     {
         int fstNumRows = 0;//定义搜索返回的行数
-        if(db.driver()->hasFeature(QSqlDriver::QuerySize))
+        if(db.driver()->hasFeature(QSqlDriver::QuerySize))//判断驱动是否包含QuerySize
         {
-            fstNumRows = fstMenuQuery.size();
+            fstNumRows = fstMenuQuery.size();//将返回的行数赋于fstNumRows
         }
         else
         {
-            fstMenuQuery.last();
-            fstNumRows = fstMenuQuery.at()+1;
-            fstMenuQuery.seek(-1);
+            fstMenuQuery.last();//移至最后一行
+            fstNumRows = fstMenuQuery.at()+1;//将返回的行数赋于fstNumRows
+            fstMenuQuery.seek(-1);//返回第一行
         }
-        if(fstNumRows>0)
+        if(fstNumRows>0)//判断搜索得到的结果是否大于0
         {
-            menuTree = new QTreeView();
-            treeModel = new QStandardItemModel(fstNumRows,1);
-            treeModel->setHeaderData(0,Qt::Horizontal,tr("目录"));
+            menuTree = new QTreeView();//建立目录树
+            treeModel = new QStandardItemModel(fstNumRows,1);//设置目录的大小
+            treeModel->setHeaderData(0,Qt::Horizontal,tr("目录"));//设置目录头
             int fstInt = 0;
             while(fstMenuQuery.next())//加载一级目录
             {
-                QStandardItem *fstItem = new QStandardItem(fstMenuQuery.value(0).toString());
-                fstItem->setData(1,Qt::UserRole);
-                treeModel->setItem(fstInt,fstItem);
-                fstInt++;
+                QStandardItem *fstItem = new QStandardItem(fstMenuQuery.value(0).toString());//新建一级目录各子项
+                fstItem->setData(1,Qt::UserRole);//设置目录阶数
+                treeModel->setItem(fstInt,fstItem);//将一级目录加载到目录树中
+                fstInt++;//fstInt自加
 
-                if(secMenuQuery.exec("SELECT menuitem, id FROM secondmenus WHERE parentid = "+ fstMenuQuery.value(1).toString()))
+                if(secMenuQuery.exec("SELECT menuitem, id FROM secondmenus WHERE parentid = "+ fstMenuQuery.value(1).toString()))//判断是否有二级目录
                 {
-                    int secNumRows = 0;
+                    int secNumRows = 0;//定义搜索返回的行数
                     if(db.driver()->hasFeature(QSqlDriver::QuerySize))
                     {
                         secNumRows = secMenuQuery.size();
@@ -140,13 +140,13 @@ void MainWindow::createMenuTree()
                         secNumRows = secMenuQuery.at()+1;
                         secMenuQuery.seek(-1);
                     }
-                    if(secNumRows>0)
+                    if(secNumRows>0)//判断搜索得到的结果是否大于0
                     {
                         while(secMenuQuery.next())//加载二级目录
                         {
-                            QStandardItem *secItem = new QStandardItem(secMenuQuery.value(0).toString());
-                            secItem->setData(2,Qt::UserRole);
-                            fstItem->appendRow(secItem);
+                            QStandardItem *secItem = new QStandardItem(secMenuQuery.value(0).toString());//新建二级目录各子项
+                            secItem->setData(2,Qt::UserRole);//设置目录阶数为2
+                            fstItem->appendRow(secItem);//加载二级目录
 
                             if(thdMenuQuery.exec("SELECT menuitem, id FROM thirdmenus WHERE parentid = "+ secMenuQuery.value(1).toString()))
                             {
@@ -165,9 +165,9 @@ void MainWindow::createMenuTree()
                                 {
                                     while(thdMenuQuery.next())//加载三级目录
                                     {
-                                        QStandardItem *thdItem = new QStandardItem(thdMenuQuery.value(0).toString());
-                                        thdItem->setData(3,Qt::UserRole);
-                                        secItem->appendRow(thdItem);
+                                        QStandardItem *thdItem = new QStandardItem(thdMenuQuery.value(0).toString());//新建三级目录各子项
+                                        thdItem->setData(3,Qt::UserRole);//设置目录阶数为3
+                                        secItem->appendRow(thdItem);//加载三级目录
                                     }
                                 }
                             }
@@ -175,18 +175,71 @@ void MainWindow::createMenuTree()
                     }
                 }
             }
-            menuTree->setModel(treeModel);
+            menuTree->setModel(treeModel);//设置目录树的MODEL
             menuTree->setEditTriggers(QAbstractItemView::NoEditTriggers);//设置为不可编辑
-            mainSplitter->addWidget(menuTree);
+            menuTree->resizeColumnToContents(0);//设置树的宽度
+            mainSplitter->addWidget(menuTree);//将目录加载到主面板中
 
-            connect(menuTree,SIGNAL(clicked(QModelIndex)),this,SLOT(menuTreeClick(QModelIndex)));
+            connect(menuTree,SIGNAL(clicked(QModelIndex)),this,SLOT(menuTreeClick(QModelIndex)));//当用户点击树目录时，启动menuTreeClick函数
         }
     }
+}
+
+void MainWindow::readAd(int adId)//读取广告
+{
+    adView = new AdGraphicsView;
+    QSqlQuery adQuery;//对广告表单搜索
+    if(adQuery.exec("SELECT aditem FROM adtable WHERE id = "+QString().setNum(adId)))
+    {
+        int adNumRows = 0;//定义搜索返回的行数
+        if(db.driver()->hasFeature(QSqlDriver::QuerySize))//判断驱动是否包含QuerySize
+        {
+            adNumRows = adQuery.size();//将返回的行数赋于fstNumRows
+        }
+        else
+        {
+            adQuery.last();//移至最后一行
+            adNumRows = adQuery.at()+1;//将返回的行数赋于fstNumRows
+            adQuery.seek(-1);//返回第一行
+        }
+        if(adNumRows>0)//判断是否大于0
+        {
+            while(adQuery.next())
+            {
+                this->adView->readAd(adQuery.value(0).toByteArray());//读取广告
+            }            
+        }
+    }
+    mainSplitter->addWidget(this->adView);
 }
 
 void MainWindow::menuTreeClick(QModelIndex)
 {
     QVariant clickedItem = menuTree->selectionModel()->currentIndex().data(Qt::UserRole);
     QModelIndex index = menuTree->selectionModel()->currentIndex().child(0,0);
+    if(index.data(Qt::DisplayRole).toString()==NULL)
+    {
+        switch(clickedItem.toInt())
+        {
+        case 1:
+            {
+                QMessageBox::critical(0,tr("无法打开数据库"),tr("1"));
+            }
+            break;
 
+        case 2:
+            {
+                QMessageBox::critical(0,tr("无法打开数据库"),tr("2"));
+            }
+            break;
+
+        case 3:
+            {
+                QMessageBox::critical(0,tr("无法打开数据库"),tr("3"));
+            }
+            break;
+        default:
+            break;
+        }
+    }
 }
