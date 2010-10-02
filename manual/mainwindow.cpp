@@ -13,12 +13,14 @@ MainWindow::MainWindow(QWidget *parent)
         this->createMenus();//创建菜单栏
         this->createToolBars();//创建工具栏
         this->createMenuTree();//创建目录树
-        this->readAd(1);//创建广告面板
+        this->createAd();//创建广告面板
+        this->createTable();//创建表格面板
+        mainSplitter->setStretchFactor(1,1);//设置比例左小右大
         this->setCentralWidget(mainSplitter);//加载主面板
     }
 }
 
-MainWindow::~MainWindow()
+MainWindow::~MainWindow()//析构函数
 {}
 
 //创建连接
@@ -185,9 +187,40 @@ void MainWindow::createMenuTree()
     }
 }
 
+void MainWindow::createAd()//创建广告
+{
+    adView = new AdGraphicsView;//创建视图
+    this->readAd(1);//读取id=1的广告
+    this->adView->init();//初始化
+    mainSplitter->addWidget(this->adView);//加载至主面板
+}
+
+void MainWindow::createTable()//创建表格面板
+{
+    rightSplitter = new QSplitter(Qt::Vertical);
+    QStandardItemModel headerModel;
+    this->buildTableHeaderModel(headerModel);
+    QStandardItemModel dataModel;
+    this->buildTableDataModel(dataModel);
+    ProxyModelWithHeaderModels model;
+    model.setModel(&dataModel);
+    model.setHorizontalHeaderModel(&headerModel);
+    model.setVerticalHeaderModel(&headerModel);
+    dataTable = new QTableView;
+    HierarchicalHeaderView* hv = new HierarchicalHeaderView(Qt::Horizontal,dataTable);
+    dataTable->setHorizontalHeader(hv);
+    hv = new HierarchicalHeaderView(Qt::Vertical,dataTable);
+    dataTable->setVerticalHeader(hv);
+    dataTable->setModel(&model);
+    dataTable->resizeColumnsToContents();
+    dataTable->resizeRowsToContents();
+    rightSplitter->hide();
+    rightSplitter->addWidget(dataTable);
+    mainSplitter->addWidget(rightSplitter);
+}
+
 void MainWindow::readAd(int adId)//读取广告
 {
-    adView = new AdGraphicsView;
     QSqlQuery adQuery;//对广告表单搜索
     if(adQuery.exec("SELECT aditem FROM adtable WHERE id = "+QString().setNum(adId)))
     {
@@ -206,40 +239,200 @@ void MainWindow::readAd(int adId)//读取广告
         {
             while(adQuery.next())
             {
-                this->adView->readAd(adQuery.value(0).toByteArray());//读取广告
-            }            
+                this->adView->loadMap(adQuery.value(0).toByteArray());//读取广告
+            }
         }
     }
-    mainSplitter->addWidget(this->adView);
 }
 
 void MainWindow::menuTreeClick(QModelIndex)
 {
     QVariant clickedItem = menuTree->selectionModel()->currentIndex().data(Qt::UserRole);
-    QModelIndex index = menuTree->selectionModel()->currentIndex().child(0,0);
-    if(index.data(Qt::DisplayRole).toString()==NULL)
+    int rowId = menuTree->selectionModel()->currentIndex().row()+1;
+    QSqlQuery rowQuery;
+    switch(clickedItem.toInt())
     {
-        switch(clickedItem.toInt())
+    case 1:
         {
-        case 1:
+            if(rowQuery.exec("SELECT tableid, adid FROM firstmenus WHERE id = "+QString().setNum(rowId)))
             {
-                QMessageBox::critical(0,tr("无法打开数据库"),tr("1"));
-            }
-            break;
-
-        case 2:
-            {
-                QMessageBox::critical(0,tr("无法打开数据库"),tr("2"));
-            }
-            break;
-
-        case 3:
-            {
-                QMessageBox::critical(0,tr("无法打开数据库"),tr("3"));
-            }
-            break;
-        default:
-            break;
+                int adNumRows = 0;//定义搜索返回的行数
+                if(db.driver()->hasFeature(QSqlDriver::QuerySize))//判断驱动是否包含QuerySize
+                {
+                    adNumRows = rowQuery.size();//将返回的行数赋于adNumRows
+                }
+                else
+                {
+                    rowQuery.last();//移至最后一行
+                    adNumRows = rowQuery.at()+1;//将返回的行数赋于adNumRows
+                    rowQuery.seek(-1);//返回第一行
+                }
+                if(adNumRows>0)//判断是否大于0
+                {
+                    rowQuery.next();
+                    if(rowQuery.value(0).toInt()==0)
+                    {
+                        if(this->adView->isHidden())
+                        {
+                            this->rightSplitter->hide();
+                            this->adView->show();
+                        }
+                        this->readAd(rowQuery.value(1).toInt());
+                        this->adView->viewUpdate();
+                    }
+                    else
+                    {
+                        if(this->rightSplitter->isHidden())
+                        {
+                            this->adView->hide();
+                            this->rightSplitter->show();
+                        }
+                        this->readTable(rowQuery.value(0).toInt());
+                    }
+                }
+            }            
         }
+        break;
+
+    case 2:
+        {
+            if(rowQuery.exec("SELECT tableid, adid FROM secondmenus WHERE id = "+QString().setNum(rowId)))
+            {
+                int adNumRows = 0;//定义搜索返回的行数
+                if(db.driver()->hasFeature(QSqlDriver::QuerySize))//判断驱动是否包含QuerySize
+                {
+                    adNumRows = rowQuery.size();//将返回的行数赋于adNumRows
+                }
+                else
+                {
+                    rowQuery.last();//移至最后一行
+                    adNumRows = rowQuery.at()+1;//将返回的行数赋于adNumRows
+                    rowQuery.seek(-1);//返回第一行
+                }
+                if(adNumRows>0)//判断是否大于0
+                {
+                    rowQuery.next();
+                    if(rowQuery.value(0).toInt()==0)
+                    {
+                        if(this->adView->isHidden())
+                        {
+                            this->rightSplitter->hide();
+                            this->adView->show();
+                        }
+                        this->readAd(rowQuery.value(1).toInt());
+                        this->adView->viewUpdate();
+                    }
+                    else
+                    {
+                        if(this->rightSplitter->isHidden())
+                        {
+                            this->adView->hide();
+                            this->rightSplitter->show();
+                        }
+                        this->readTable(rowQuery.value(0).toInt());
+                    }
+                }
+            }
+        }
+        break;
+
+    case 3:
+        {
+            if(rowQuery.exec("SELECT tableid, adid FROM thirdmenus WHERE id = "+QString().setNum(rowId)))
+            {
+                int adNumRows = 0;//定义搜索返回的行数
+                if(db.driver()->hasFeature(QSqlDriver::QuerySize))//判断驱动是否包含QuerySize
+                {
+                    adNumRows = rowQuery.size();//将返回的行数赋于adNumRows
+                }
+                else
+                {
+                    rowQuery.last();//移至最后一行
+                    adNumRows = rowQuery.at()+1;//将返回的行数赋于adNumRows
+                    rowQuery.seek(-1);//返回第一行
+                }
+                if(adNumRows>0)//判断是否大于0
+                {
+                    rowQuery.next();
+                    if(rowQuery.value(0).toInt()==0)
+                    {
+                        if(this->adView->isHidden())
+                        {
+                            this->rightSplitter->hide();
+                            this->adView->show();
+                        }
+                        this->readAd(rowQuery.value(1).toInt());
+                        this->adView->viewUpdate();
+                    }
+                    else
+                    {
+                        if(this->rightSplitter->isHidden())
+                        {
+                            this->adView->hide();
+                            this->rightSplitter->show();
+                        }
+                        this->readTable(rowQuery.value(0).toInt());
+                    }
+                }
+            }
+        }
+        break;
+
+    default:
+        break;
+    }
+}
+
+void MainWindow::readTable(int tableId)//读取表单数据
+{
+
+}
+
+void MainWindow::buildTableHeaderModel(QStandardItemModel& headerModel)
+{
+    QStandardItem* rootItem = new QStandardItem("root");
+            QList<QStandardItem*> l;
+
+            QStandardItem* rotatedTextCell=new QStandardItem("Rotated text");
+            rotatedTextCell->setData(1, Qt::UserRole);
+            l.push_back(rotatedTextCell);
+            rootItem->appendColumn(l);
+
+            l.clear();
+
+            QStandardItem* cell=new QStandardItem("level 2");
+            l.push_back(cell);
+            rootItem->appendColumn(l);
+
+            l.clear();
+
+            l.push_back(new QStandardItem("level 3"));
+            cell->appendColumn(l);
+
+            l.clear();
+
+            l.push_back(new QStandardItem("level 3"));
+            cell->appendColumn(l);
+
+            l.clear();
+
+            l.push_back(new QStandardItem("level 2"));
+            rootItem->appendColumn(l);
+
+            headerModel.setItem(0,0,rootItem);
+}
+
+void MainWindow::buildTableDataModel(QStandardItemModel& model)
+{
+    QString cellText("cell(%1,%2)");
+    for(int i=0; i<4; ++i)
+    {
+        QList<QStandardItem*> l;
+        for(int j=0; j<4; ++j)
+        {
+            QStandardItem* cell = new QStandardItem(cellText.arg(i).arg(j));
+            l.push_back(cell);
+        }
+        model.appendRow(l);
     }
 }

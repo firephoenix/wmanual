@@ -20,6 +20,7 @@
 #include <QtGui/QSplitter>
 #include <QtGui/QTableView>
 #include "adgraphicsview.h"
+#include "ProxyModelWithHeaderModels.h"
 
 
 class MainWindow : public QMainWindow
@@ -43,7 +44,11 @@ private:
     void createToolBars();//创建工具栏
     void createMenuTree();//创建目录树
     void createAd();//广告面板
+    void createTable();//表格面板
     void readAd(int adId);//读取广告
+    void readTable(int tableId);//读取表单数据
+    void buildTableHeaderModel(QStandardItemModel& headerModel);//绑定表头数据
+    void buildTableDataModel(QStandardItemModel& model);//绑定数据
 
 private:
     QAction *exitAction;//动作退出
@@ -62,7 +67,8 @@ private:
     QSqlDatabase db;//声明数据库
     QTreeView *menuTree;//声明目录树
     QStandardItemModel *treeModel;//声明TREEMODE
-    QTableView *contentTable;//内容表单
+    QSplitter *rightSplitter;//右面板
+    QTableView *dataTable;//内容表单
 
     QSplitter *mainSplitter;//声明主面板
 

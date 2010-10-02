@@ -1,14 +1,23 @@
 #include "adgraphicsview.h"
 
-AdGraphicsView::AdGraphicsView(QPixmap map)
-{
-    this->adMap = map;
+AdGraphicsView::AdGraphicsView()
+{}
 
-    int width = this->adMap.width();
-    int height = this->adMap.height();
+AdGraphicsView::~AdGraphicsView()
+{}
+
+void AdGraphicsView::loadMap(QByteArray map)
+{
+    this->adMap.loadFromData(map);
+}
+
+void AdGraphicsView::init()
+{
+    width = this->adMap.width();
+    height = this->adMap.height();
     QLabel *cornerLabel = new QLabel(tr("¹ã¸æ"));
 
-    QGraphicsScene *adScene = new QGraphicsScene(this);
+    adScene = new QGraphicsScene(this);
 
     adScene->setSceneRect(-width/2,-height/2,width,height);
 
@@ -17,6 +26,7 @@ AdGraphicsView::AdGraphicsView(QPixmap map)
 
     QVBoxLayout *advLayout = new QVBoxLayout;
     advLayout->addWidget(cornerLabel);
+    advLayout->setMargin(15);
     advLayout->addStretch();
 
     QHBoxLayout *adhLayout = new QHBoxLayout;
@@ -25,6 +35,14 @@ AdGraphicsView::AdGraphicsView(QPixmap map)
     adhLayout->setDirection(QBoxLayout::RightToLeft);
 
     this->setLayout(adhLayout);
+}
+
+void AdGraphicsView::viewUpdate()
+{
+    width = this->adMap.width();
+    height = this->adMap.height();
+    this->adScene->setSceneRect(-width/2,-height/2,width,height);
+    this->repaint();
 }
 
 void AdGraphicsView::drawBackground(QPainter *painter, const QRectF &rect)
